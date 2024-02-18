@@ -3,13 +3,8 @@ import BlogList from "./BlogList";
 
 const Home = () => {
 
-    const[blogs, setBlogs] = useState(
-        [
-            {title: 'My new website', body: 'lorem ipsum...', author: 'mario', id: 1},
-            {title: 'Welcome party!', body: 'lorem ipsum...', author: 'yoshi', id: 2},
-            {title: 'Web dev top tips', body: 'lorem ipsum...', author: 'mario', id: 3}
-        ]
-    )
+    const[blogs, setBlogs] = useState(null)
+    const [isPending, setIsPending] = useState(true); //simulating a delay in fetching data
 
     const handleDelete = (id) => {
         const newBlogs = blogs.filter(blog => blog.id !== id);
@@ -17,17 +12,27 @@ const Home = () => {
     }
 
     useEffect(() => {
-        console.log('use effect ran');
-    }, [blogs]); //only run when blogs change
-    // if the array was empty, it would only run once when the component is first rendered
+        setTimeout(() => {
+            fetch('http://localhost:8000/blogs')
+            .then(res => {
+                return res.json(); //parse the json data into js object
+            })
+            .then(data => {
+                setBlogs(data);
+                setIsPending(false);
+            })
+        }, 1000)
+     
+    }, []); //only run when it renders for the first time
 
     return ( 
         <div className="home">
-          <BlogList blogs = {blogs} title = "All blogs" handleDelete = {handleDelete}/>
+            {isPending && <div>Loading...</div>}
+            {blogs && <BlogList blogs = {blogs} title = "All blogs" handleDelete = {handleDelete}/> }
         </div>
      );
 
     
 }
  
-export default Home;
+export default Home; 
